@@ -39,7 +39,7 @@ export async function buildReportPdf(a: Analysis, patient: Patient | undefined, 
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5)
   doc.text('AI-Assisted Medical Image Analysis', M, 20)
   doc.setFontSize(8.5)
-  doc.text('DEMO MODE — simulated results', W - M, 13, { align: 'right' })
+  doc.text(a.result.mode === 'real' ? 'AI-ASSISTED — not a diagnosis' : 'DEMO MODE — simulated results', W - M, 13, { align: 'right' })
   doc.text(`Generated ${formatDateTime(new Date().toISOString())}`, W - M, 20, { align: 'right' })
   y = 38
 
@@ -92,13 +92,13 @@ export async function buildReportPdf(a: Analysis, patient: Patient | undefined, 
     y += bh + 5
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY)
     doc.text('Original image', M, y)
-    doc.text('Simulated explainability visualization (not model-derived)', W - M - bw, y)
+    doc.text(a.result.mode === 'real' ? 'Grad-CAM attention map (model focus, not a diagnosis)' : 'Simulated explainability visualization (not model-derived)', W - M - bw, y)
     y += 8
   } catch {
     para('', 'Image could not be embedded.')
   }
 
-  heading('AI Analysis (simulated prototype output)')
+  heading(a.result.mode === 'real' ? 'AI Analysis (model output — decision support only)' : 'AI Analysis (simulated prototype output)')
   kv([
     ['AI Prediction', a.result.prediction],
     ['Confidence', `${a.result.confidence.toFixed(1)}%`],
@@ -116,7 +116,7 @@ export async function buildReportPdf(a: Analysis, patient: Patient | undefined, 
   kv([['Review status', a.reviewStatus], ['Reviewed by', a.reviewedBy ?? 'Awaiting review']])
 
   heading('Model')
-  kv([['Model version', a.result.modelVersion], ['Inference mode', a.result.mode === 'demo' ? 'Simulation (Demo AI Mode)' : 'Real inference']])
+  kv([['Model version', a.result.modelVersion], ['Inference mode', a.result.mode === 'demo' ? 'Simulation (Demo AI Mode)' : 'Real inference (trained model)']])
 
   heading('Disclaimer')
   para(DISCLAIMER_FULL, '')

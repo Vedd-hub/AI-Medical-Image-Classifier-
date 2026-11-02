@@ -8,7 +8,7 @@ export const DISCLAIMER_FULL =
 
 export const MODALITIES: { name: Modality; supported: boolean }[] = [
   { name: 'Chest X-Ray', supported: true },
-  { name: 'MRI', supported: false },
+  { name: 'MRI', supported: true },
   { name: 'CT Scan', supported: false },
   { name: 'Ultrasound', supported: false },
   { name: 'Retinal Image', supported: false },

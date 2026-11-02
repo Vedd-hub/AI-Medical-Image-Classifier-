@@ -2,6 +2,7 @@ import { ArrowDown, Database, Cpu } from 'lucide-react'
 import { PageHeader, SectionTitle } from '../components/PageHeader'
 import { DemoBadge } from '../components/Feedback'
 import { MODEL_INFO } from '../data/constants'
+import { inferenceMode } from '../services/aiService'
 
 const ARCH = ['Input Image', 'Preprocessing', 'CNN / ResNet Backbone', 'Feature Extraction', 'Classification Head', 'Probability Output', 'Explainability']
 const PIPELINE = ['Dataset', 'Cleaning', 'Preprocessing', 'Train / Validation / Test', 'Model Training', 'Evaluation', 'Deployment']
@@ -22,10 +23,12 @@ function Flow({ items }: { items: string[] }) {
 }
 
 export default function ModelInfo() {
-  const rows: [string, string][] = [
-    ['Architecture', MODEL_INFO.architecture], ['Version', MODEL_INFO.version], ['Inference mode', MODEL_INFO.mode],
-    ['Explainability', MODEL_INFO.explainability], ['Dataset', MODEL_INFO.dataset],
-  ]
+  const real = inferenceMode === 'real'
+  const rows: [string, string][] = real
+    ? [['Architecture', 'MobileNetV2 (ImageNet transfer learning)'], ['Models', 'Chest X-Ray (2 classes) · Brain MRI (4 classes)'], ['Inference mode', 'Real inference (TensorFlow / Keras)'],
+       ['Explainability', 'Grad-CAM'], ['Dataset', 'See model repository']]
+    : [['Architecture', MODEL_INFO.architecture], ['Version', MODEL_INFO.version], ['Inference mode', MODEL_INFO.mode],
+       ['Explainability', MODEL_INFO.explainability], ['Dataset', MODEL_INFO.dataset]]
   return (
     <>
       <PageHeader title="Model Information" subtitle="Current model configuration and the planned real-model pipeline." actions={<DemoBadge />} />
@@ -36,8 +39,8 @@ export default function ModelInfo() {
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Cpu className="h-6 w-6" aria-hidden="true" /></div>
             <div>
-              <p className="text-lg font-semibold text-navy-900">{MODEL_INFO.name}</p>
-              <p className="mt-1 text-[13px] text-muted">A simulated classifier used to demonstrate the workflow. No trained model is connected.</p>
+              <p className="text-lg font-semibold text-navy-900">{real ? 'MedVision MobileNetV2 Classifiers' : MODEL_INFO.name}</p>
+              <p className="mt-1 text-[13px] text-muted">{real ? 'Trained student-project classifiers served by the FastAPI backend. Not clinically validated; evaluation metrics are not displayed here.' : 'A simulated classifier used to demonstrate the workflow. No trained model is connected.'}</p>
             </div>
           </div>
           <dl className="divide-y divide-line rounded-xl border border-line">

@@ -71,9 +71,11 @@ export default function AnalysisResultPage() {
 
       <div className="mb-5 flex flex-wrap items-center gap-3 rounded-xl border border-warn-700/25 bg-warn-50 px-4 py-3" role="note">
         <FlaskConical className="h-[18px] w-[18px] shrink-0 text-warn-700" aria-hidden="true" />
-        <p className="text-[12px] font-bold tracking-wider text-warn-700">DEMO AI RESULT</p>
+        <p className="text-[12px] font-bold tracking-wider text-warn-700">{a.result.mode === 'real' ? 'AI-ASSISTED RESULT' : 'DEMO AI RESULT'}</p>
         <p className="min-w-[240px] flex-1 text-[12.5px] leading-relaxed text-[#6b4a0d]">
-          This prototype uses simulated AI results for demonstration purposes. Results are not medical diagnoses and must not be used as a substitute for professional medical judgment.
+          {a.result.mode === 'real'
+            ? 'This result comes from a trained student-project model that has not been clinically validated. It is not a medical diagnosis and must not be used as a substitute for professional medical judgment.'
+            : 'This prototype uses simulated AI results for demonstration purposes. Results are not medical diagnoses and must not be used as a substitute for professional medical judgment.'}
         </p>
       </div>
 
@@ -87,12 +89,12 @@ export default function AnalysisResultPage() {
               {isPlaceholder ? 'Placeholder illustration for a fictional demo record — not a real medical image.' : a.fileName}
             </p>
           </div>
-          <HeatmapViewer heat={heat} failed={failed} base={base} />
+          <HeatmapViewer heat={heat} failed={failed} base={base} real={a.result.mode === 'real'} />
         </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
           <div className="space-y-5 lg:col-span-2">
-            <ProbabilityChart normal={a.result.probabilities.normal} abnormal={a.result.probabilities.abnormal} />
+            <ProbabilityChart result={a.result} />
             <FindingCard a={a} />
           </div>
           <div className="space-y-5">

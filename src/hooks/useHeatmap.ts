@@ -13,6 +13,7 @@ export function useHeatmap(a: Analysis | undefined) {
   useEffect(() => {
     if (!a || !base) return
     if (a.result.heatmapUrl) { setHeat(a.result.heatmapUrl); return }
+    if (a.result.mode === 'real') { setHeat(undefined); setFailed(true); return } // never substitute a simulated map for a real result
     let live = true
     setFailed(false)
     generateDemoHeatmap(base, hashString(a.studyId), a.result.probabilities.abnormal > a.result.probabilities.normal)

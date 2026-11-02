@@ -29,7 +29,7 @@ export function DoctorReview({ a, readOnly, onSave }: {
 
       <div className="grid gap-px bg-line md:grid-cols-2">
         <div className="bg-[#fafbfc] p-5">
-          <p className="flex items-center gap-1.5 text-[11.5px] font-bold tracking-wider text-muted"><Bot className="h-3.5 w-3.5" aria-hidden="true" />AI PREDICTION <span className="font-medium normal-case tracking-normal text-faint">(simulated)</span></p>
+          <p className="flex items-center gap-1.5 text-[11.5px] font-bold tracking-wider text-muted"><Bot className="h-3.5 w-3.5" aria-hidden="true" />AI PREDICTION <span className="font-medium normal-case tracking-normal text-faint">{a.result.mode === 'real' ? '(model output)' : '(simulated)'}</span></p>
           <p className="mt-2 text-[15px] font-semibold text-ink">{a.result.prediction}</p>
           <p className="text-[12.5px] text-muted">Confidence {a.result.confidence.toFixed(1)}% · decision-support only</p>
         </div>

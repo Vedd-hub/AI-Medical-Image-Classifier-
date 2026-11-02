@@ -10,6 +10,7 @@ import { AddPatientModal } from '../components/AddPatientModal'
 import { DemoBadge, EmptyState, ErrorNotice } from '../components/Feedback'
 import { useApp } from '../context/AppContext'
 import { MODALITIES, PENDING_NOTE } from '../data/constants'
+import { inferenceMode } from '../services/aiService'
 import { runInference } from '../services/aiService'
 import { validateImage, type ImageValidation } from '../services/image'
 import type { Analysis as AnalysisRecord, Modality, ResultLabel } from '../types'
@@ -95,7 +96,7 @@ export default function Analysis() {
         (s, p) => { if (alive.current) { setStage(s); setStageProgress(p) } },
       )
       if (!alive.current) return
-      const label: ResultLabel = result.probabilities.abnormal > result.probabilities.normal ? (result.confidence < 80 ? 'Needs Review' : 'Abnormal') : 'Normal'
+      const label: ResultLabel = result.prediction.startsWith('Inconclusive') ? 'Needs Review' : result.probabilities.abnormal > result.probabilities.normal ? (result.confidence < 80 ? 'Needs Review' : 'Abnormal') : 'Normal'
       const rec: AnalysisRecord = {
         studyId: nextStudyId(), patientId: patient.id, modality, date: new Date().toISOString(),
         result, resultLabel: label, reviewStatus: 'Pending Review', clinicalNotes: '', finalInterpretation: '',
@@ -115,7 +116,7 @@ export default function Analysis() {
 
   return (
     <>
-      <PageHeader title="Image Analysis" subtitle="Upload an image, run simulated AI analysis, then review." actions={<DemoBadge />} />
+      <PageHeader title="Image Analysis" subtitle={inferenceMode === 'real' ? 'Upload an image, run AI analysis, then review.' : 'Upload an image, run simulated AI analysis, then review.'} actions={inferenceMode === 'real' ? undefined : <DemoBadge />} />
       <Stepper current={step} />
 
       {step === 1 && (
@@ -172,12 +173,12 @@ export default function Analysis() {
                   <button key={m.name} role="radio" aria-checked={modality === m.name} onClick={() => setModality(m.name)}
                     className={`rounded-[10px] border px-3 py-2.5 text-left transition-colors ${modality === m.name ? 'border-navy-900 bg-brand-50' : 'border-line hover:border-[#b9c1cd] hover:bg-canvas'}`}>
                     <span className="block text-[13px] font-medium text-ink">{m.name}</span>
-                    <span className={`text-[11px] ${m.supported ? 'text-ok-700' : 'text-faint'}`}>{m.supported ? 'Primary' : 'Model pending'}</span>
+                    <span className={`text-[11px] ${m.supported ? 'text-ok-700' : 'text-faint'}`}>{m.supported ? (inferenceMode === 'real' ? 'Model ready' : 'Primary') : 'Model pending'}</span>
                   </button>
                 ))}
               </div>
               {modalityPending && (
-                <p className="mt-3 flex items-start gap-2 rounded-lg bg-brand-50 px-3 py-2 text-[12.5px] text-brand-700"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />{PENDING_NOTE} Any output is illustrative only.</p>
+                <p className="mt-3 flex items-start gap-2 rounded-lg bg-brand-50 px-3 py-2 text-[12.5px] text-brand-700"><Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />{PENDING_NOTE} {inferenceMode === 'real' ? 'Analysis is unavailable for this modality.' : 'Any output is illustrative only.'}</p>
               )}
             </div>
           </section>
@@ -219,10 +220,10 @@ export default function Analysis() {
           <section className="card p-5">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-[11.5px] font-bold tracking-wider text-warn-700">DEMO AI MODE</p>
-                <p className="mt-0.5 text-[13px] text-muted">This prototype uses simulated inference.</p>
+                <p className="text-[11.5px] font-bold tracking-wider text-warn-700">{inferenceMode === 'real' ? 'AI-ASSISTED ANALYSIS' : 'DEMO AI MODE'}</p>
+                <p className="mt-0.5 text-[13px] text-muted">{inferenceMode === 'real' ? 'Runs the trained model on the server. Output is a screening aid, not a diagnosis.' : 'This prototype uses simulated inference.'}</p>
               </div>
-              <button className="btn btn-primary btn-lg" onClick={run} disabled={!loaded}><Play className="h-4 w-4" aria-hidden="true" />Run AI Analysis</button>
+              <button className="btn btn-primary btn-lg" onClick={run} disabled={!loaded || (inferenceMode === 'real' && modalityPending)}><Play className="h-4 w-4" aria-hidden="true" />Run AI Analysis</button>
             </div>
             {!loaded && <p className="mt-3 text-[12px] text-faint">Upload a valid image to enable analysis.</p>}
           </section>

@@ -81,7 +81,7 @@ export default function SettingsPage() {
 
         <Card title="Prototype configuration">
           <dl className="divide-y divide-line rounded-xl border border-line text-[13px]">
-            {[['Inference Mode', inferenceMode === 'demo' ? 'Demo' : 'Real'], ['Model', 'Demo Chest X-Ray Classifier'], ['Database', 'SQLite']].map(([k, v]) => <div key={k} className="flex justify-between px-4 py-2.5"><dt className="text-muted">{k}</dt><dd className="font-medium">{v}</dd></div>)}
+            {[['Inference Mode', inferenceMode === 'demo' ? 'Demo' : 'Real'], ['Model', inferenceMode === 'real' ? 'MobileNetV2 (Chest X-Ray, Brain MRI)' : 'Demo Chest X-Ray Classifier'], ['Database', 'SQLite']].map(([k, v]) => <div key={k} className="flex justify-between px-4 py-2.5"><dt className="text-muted">{k}</dt><dd className="font-medium">{v}</dd></div>)}
           </dl>
           <p className="text-[12px] leading-relaxed text-faint">Set <code className="rounded bg-canvas px-1">VITE_INFERENCE_MODE</code> in <code className="rounded bg-canvas px-1">.env</code> to switch inference sources. Images are processed locally in your browser and are never uploaded to third-party services.</p>
         </Card>

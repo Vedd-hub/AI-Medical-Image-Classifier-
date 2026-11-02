@@ -1,9 +1,7 @@
 fastapi>=0.110
 uvicorn[standard]>=0.29
 python-multipart>=0.0.9
-# Future real-model integration:
-# torch
-# torchvision
-# opencv-python
-# pillow
-# grad-cam
+# Models were saved with Keras 2.14 -> TensorFlow 2.14 (Python 3.9-3.11)
+tensorflow==2.14.*
+numpy<2
+pillow

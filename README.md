@@ -39,14 +39,25 @@ The frontend is fully functional without the backend; state lives in memory for 
 The attention overlay comes from `generateDemoHeatmap()` (`services/heatmap.ts`): seeded blobs, **not** model-derived, and labelled *Simulated* everywhere.
 Demo records without an uploaded file use a procedurally drawn placeholder (`services/phantom.ts`), not a real scan.
 
-## Future real ML integration
-1. Train/export a PyTorch classifier; load it once in `backend/services/inference.py`.
-2. Preprocess with Pillow/OpenCV, apply softmax, compute Grad-CAM, return the heatmap as a data URL in `heatmapUrl`.
-3. Set `VITE_INFERENCE_MODE=real`. Replace `generateDemoHeatmap` with `generateGradCAM` if heatmaps are computed client-side.
-The UI consumes only `AnalysisResult`, so no redesign is needed.
+## Real model integration
+The trained classifiers (from the separate model repository, Keras 2.14 / MobileNetV2) live in `backend/models/`:
+- **Chest X-Ray** — `NORMAL` / `PNEUMONIA`
+- **MRI (brain)** — `glioma` / `meningioma` / `notumor` / `pituitary`
+
+`backend/services/inference.py` loads them once at startup, runs inference and computes a real **Grad-CAM** map; `POST /api/analyze` selects the model from the chosen modality. Low-confidence (<70 %) results are returned as *Inconclusive — needs review*. Other modalities return HTTP 400.
+
+Run it (the models need TensorFlow 2.14, i.e. Python 3.9-3.11):
+```bash
+cd backend
+py -3.10 -m venv .venv && .venv/Scripts/pip install -r requirements.txt
+.venv/Scripts/python -m uvicorn main:app --port 8000
+```
+then set `VITE_INFERENCE_MODE=real` (e.g. in `.env.local`) and restart `npm run dev`. The deployed Vercel site stays in demo mode because the backend is not hosted there.
+
+No accuracy figures are claimed: the models were trained by the project team and have not been clinically validated; they may give confident but wrong output on images unlike their training data.
 
 ## Dataset integration
-No dataset is connected and no accuracy metrics are claimed; the Model page shows *Pending dataset* placeholders. Planned pipeline: dataset → cleaning → preprocessing → train/val/test → training → evaluation → deployment. Populate the metrics from real evaluation output.
+Training code and data details live in the model repository. Populate the Model page metrics from its real evaluation output.
 
 ## Running locally
 ```bash

@@ -28,10 +28,10 @@ export function ReportPreview({ a, patient, base, heat }: { a: Analysis; patient
         <Sec title="Image & explainability">
           <div className="grid grid-cols-2 gap-3">
             <figure><img src={base} alt="Original medical image" className="aspect-square w-full rounded-lg bg-black object-contain" /><figcaption className="mt-1 text-[11.5px] text-muted">Original image</figcaption></figure>
-            <figure>{heat ? <img src={heat} alt="Simulated attention map" className="aspect-square w-full rounded-lg bg-black object-contain" /> : <div className="skeleton aspect-square w-full" />}<figcaption className="mt-1 text-[11.5px] text-muted">Simulated explainability visualization</figcaption></figure>
+            <figure>{heat ? <img src={heat} alt={a.result.mode === 'real' ? 'Grad-CAM attention map' : 'Simulated attention map'} className="aspect-square w-full rounded-lg bg-black object-contain" /> : <div className="skeleton aspect-square w-full" />}<figcaption className="mt-1 text-[11.5px] text-muted">{a.result.mode === 'real' ? 'Grad-CAM attention map' : 'Simulated explainability visualization'}</figcaption></figure>
           </div>
         </Sec>
-        <Sec title="AI Analysis (simulated)">
+        <Sec title={a.result.mode === 'real' ? 'AI Analysis' : 'AI Analysis (simulated)'}>
           <dl><KV k="AI Prediction" v={a.result.prediction} /><KV k="Confidence" v={`${a.result.confidence.toFixed(1)}%`} /><KV k="Normal probability" v={`${a.result.probabilities.normal.toFixed(1)}%`} /><KV k="Abnormal probability" v={`${a.result.probabilities.abnormal.toFixed(1)}%`} /><KV k="Priority suggestion" v={a.result.priority} /></dl>
         </Sec>
         <Sec title="Doctor's Review">
@@ -41,7 +41,7 @@ export function ReportPreview({ a, patient, base, heat }: { a: Analysis; patient
           <p className="whitespace-pre-wrap text-[13px] text-ink">{a.finalInterpretation || <span className="text-faint">Pending — not yet entered.</span>}</p>
           <dl className="mt-3"><KV k="Status" v={a.reviewStatus} /><KV k="Reviewed by" v={a.reviewedBy ?? 'Awaiting review'} /></dl>
         </Sec>
-        <Sec title="Model"><dl><KV k="Model version" v={a.result.modelVersion} /><KV k="Inference mode" v={a.result.mode === 'demo' ? 'Simulation (Demo AI Mode)' : 'Real inference'} /></dl></Sec>
+        <Sec title="Model"><dl><KV k="Model version" v={a.result.modelVersion} /><KV k="Inference mode" v={a.result.mode === 'demo' ? 'Simulation (Demo AI Mode)' : 'Real inference (trained model)'} /></dl></Sec>
         <Sec title="Disclaimer"><p className="rounded-lg bg-warn-50 p-3 text-[12px] leading-relaxed text-[#6b4a0d]">{DISCLAIMER_FULL}</p></Sec>
       </div>
     </article>

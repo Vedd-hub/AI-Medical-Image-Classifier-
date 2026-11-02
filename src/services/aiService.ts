@@ -65,17 +65,36 @@ export async function runDemoInference(input: InferenceInput, onStage?: StageCal
   }
 }
 
-/** Placeholder for the future PyTorch-backed FastAPI endpoint. */
+/** Calls the FastAPI backend, which runs the trained Keras models and Grad-CAM. */
 export async function runRealInference(input: InferenceInput, onStage?: StageCallback): Promise<AnalysisResult> {
   if (!input.file) throw new Error('A file is required for real inference')
-  onStage?.(0, 1)
   const body = new FormData()
   body.append('file', input.file)
   body.append('modality', input.modality)
-  const res = await fetch(`${API_URL}/api/analyze`, { method: 'POST', body })
-  if (!res.ok) throw new Error(`Inference service returned ${res.status}`)
-  onStage?.(PROCESSING_STAGES.length - 1, 1)
-  return (await res.json()) as AnalysisResult
+
+  // The backend is a single request, so stage progress is indicative only.
+  let stage = 0
+  onStage?.(0, 1)
+  const tick = setInterval(() => {
+    if (stage < PROCESSING_STAGES.length - 2) { stage++; onStage?.(stage, 0.5) }
+  }, 700)
+  try {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), 60_000)
+    let res: Response
+    try {
+      res = await fetch(`${API_URL}/api/analyze`, { method: 'POST', body, signal: ctrl.signal })
+    } catch {
+      throw new Error('The inference service could not be reached. Check that the backend is running and try again.')
+    } finally { clearTimeout(timer) }
+    if (!res.ok) {
+      let detail = ''
+      try { detail = ((await res.json()) as { detail?: string }).detail ?? '' } catch { /* non-JSON error body */ }
+      throw new Error(detail || `The inference service returned an error (${res.status}).`)
+    }
+    onStage?.(PROCESSING_STAGES.length - 1, 1)
+    return (await res.json()) as AnalysisResult
+  } finally { clearInterval(tick) }
 }
 
 export function runInference(input: InferenceInput, onStage?: StageCallback): Promise<AnalysisResult> {

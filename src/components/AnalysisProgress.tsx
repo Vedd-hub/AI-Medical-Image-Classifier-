@@ -1,5 +1,5 @@
 import { Check, Circle, Loader2 } from 'lucide-react'
-import { PROCESSING_STAGES } from '../services/aiService'
+import { PROCESSING_STAGES, inferenceMode } from '../services/aiService'
 
 export function AnalysisProgress({ stage, stageProgress }: { stage: number; stageProgress: number }) {
   const total = PROCESSING_STAGES.length
@@ -23,7 +23,7 @@ export function AnalysisProgress({ stage, stageProgress }: { stage: number; stag
           )
         })}
       </ol>
-      <p className="mt-6 rounded-lg bg-warn-50 px-3 py-2 text-center text-[11.5px] font-medium text-warn-700">DEMO AI MODE — simulated inference in progress</p>
+      <p className="mt-6 rounded-lg bg-warn-50 px-3 py-2 text-center text-[11.5px] font-medium text-warn-700">{inferenceMode === 'real' ? 'Running trained model — this can take a few seconds' : 'DEMO AI MODE — simulated inference in progress'}</p>
     </div>
   )
 }

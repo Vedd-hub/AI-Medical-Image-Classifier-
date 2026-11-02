@@ -27,6 +27,8 @@ export interface AnalysisResult {
   prediction: string
   confidence: number
   probabilities: { normal: number; abnormal: number }
+  /** Per-class probabilities from a real multi-class model (percent). */
+  classProbabilities?: { label: string; value: number }[]
   priority: Priority
   explanation: string
   heatmapUrl?: string
